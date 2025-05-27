@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インテリアデザインギャラリー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f0e8;
+            line-height: 1.4;
+        }
+
+        /* ログイン画面 */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box h2 {
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .login-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .login-btn:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .gmail-btn {
+            background: #db4437;
+            color: white;
+            border-color: #db4437;
+        }
+
+        .gmail-btn:hover {
+            background: #c23321;
+            color: white;
+        }
+
+        .apple-btn {
+            background: #000;
+            color: white;
+            border-color: #000;
+        }
+
+        .apple-btn:hover {
+            background: #333;
+            color: white;
+        }
+
+        /* ヘッダー */
+        .header {
+            background: rgba(245, 240, 232, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            color: #8b4513;
+            text-decoration: none;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            background: white;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #8b4513;
+            box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.1);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #8b4513;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* メインコンテンツ */
+        .main-content {
+            margin-top: 50px;
+            padding: 4px;
+        }
+
+        /* マセナリーレイアウト */
+        .masonry-container {
+            column-count: 6;
+            column-gap: 4px;
+            column-fill: auto;
+        }
+
+        @media (max-width: 1200px) {
+            .masonry-container {
+                column-count: 5;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .masonry-container {
+                column-count: 4;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .masonry-container {
+                column-count: 3;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .masonry-container {
+                column-count: 2;
+            }
+        }
+
+        .design-card {
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 4px;
+            break-inside: avoid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .design-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .design-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .card-info {
+            padding: 8px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .card-company {
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* モーダル */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .modal-image {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .modal-info {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .modal-company {
+            font-size: 16px;
+            color: #8b4513;
+            margin-bottom: 20px;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+        }
+
+        /* 画像アップロード機能 */
+        .upload-section {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 200;
+        }
+
+        .upload-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #8b4513;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .upload-form {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .upload-form h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .file-input {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input:hover {
+            border-color: #8b4513;
+            background: rgba(139, 69, 19, 0.05);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #8b4513;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #a0522d;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ログイン画面 -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>ログインしてギャラリーを見る</h2>
+            <button class="login-btn gmail-btn" onclick="login('gmail')">Gmailでログイン</button>
+            <button class="login-btn" onclick="login('email')">メールアドレスでログイン</button>
+            <button class="login-btn apple-btn" onclick="login('apple')">Apple IDでログイン</button>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div id="mainContent" class="hidden">
+        <!-- ヘッダー -->
+        <header class="header">
+            <div class="header-content">
+                <a href="#" class="logo">Interior Gallery</a>
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="デザインを検索..." id="searchInput">
+                </div>
+                <div class="user-menu">
+                    <div class="user-avatar">U</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <div class="masonry-container" id="gallery">
+                <!-- デザインカードが動的に追加される -->
+            </div>
+        </main>
+
+        <!-- アップロードボタン -->
+        <div class="upload-section">
+            <button class="upload-btn" onclick="openUploadModal()">+</button>
+        </div>
+    </div>
+
+    <!-- デザイン詳細モーダル -->
+    <div class="modal" id="designModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-image">
+                <img id="modalImage" src="" alt="">
+            </div>
+            <div class="modal-info">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <p class="modal-company" id="modalCompany"></p>
+                <p class="modal-description" id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- アップロードモーダル -->
+    <div class="upload-modal" id="uploadModal">
+        <div class="upload-form">
+            <h3>新しいデザインを追加</h3>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="designTitle">タイトル</label>
+                    <input type="text" id="designTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="companyName">企業名</label>
+                    <input type="text" id="companyName" name="company" required>
+                </div>
+                <div class="form-group">
+                    <label for="designDescription">説明</label>
+                    <textarea id="designDescription" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>画像</label>
+                    <div class="file-input" onclick="document.getElementById('fileInput').click()">
+                        <p>クリックして画像を選択</p>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    </div>
+                    <div id="imagePreview"></div>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">追加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let designs = [
+            {
+                id: 1,
+                title: "モダンリビング",
+                company: "Design Studio A",
+                description: "シンプルで洗練されたモダンなリビングルームデザイン。自然光を活かした明るい空間が特徴です。",
+                image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=600&fit=crop",
+                height: 600
+            },
+            {
+                id: 2,
+                title: "スカンジナビアンキッチン",
+                company: "Nordic Design Co.",
+                description: "北欧風のミニマルなキッチンデザイン。木材の温かみと白を基調とした清潔感のある空間。",
+                image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=500&fit=crop",
+                height: 500
+            },
+            {
+                id: 3,
+                title: "和モダンベッドルーム",
+                company: "Japan Interior",
+                description: "日本の伝統的な要素を取り入れたモダンなベッドルーム。畳と現代的な家具の調和が美しい。",
+                image: "https://images.unsplash.com/photo-1540518614846-7eded47fa681?w=400&h=550&fit=crop",
+                height: 550
+            },
+            {
+                id: 4,
+                title: "インダストリアルダイニング",
+                company: "Urban Design Lab",
+                description: "工業的な要素を取り入れたダイニングルーム。コンクリートと鉄の組み合わせが印象的。",
+                image: "https://images.unsplash.com/photo-1562113530-57ba1817cea8?w=400&h=650&fit=crop",
+                height: 650
+            },
+            {
+                id: 5,
+                title: "ボヘミアンリビング",
+                company: "Boho Chic Designs",
+                description: "色彩豊かなテキスタイルと植物を使ったボヘミアンスタイルのリビング。自由で創造的な空間。",
+                image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=480&fit=crop",
+                height: 480
+            },
+            {
+                id: 6,
+                title: "ミニマルオフィス",
+                company: "Minimal Work Space",
+                description: "集中力を高めるミニマルなホームオフィス。機能性とデザイン性を両立した作業空間。",
+                image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=520&fit=crop",
+                height: 520
+            }
+        ];
+
+        let filteredDesigns = [...designs];
+        let selectedFile = null;
+
+        // ログイン処理
+        function login(provider) {
+            console.log(`${provider}でログイン`);
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainContent').classList.remove('hidden');
+            renderGallery();
+        }
+
+        // ギャラリー表示
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            
+            filteredDesigns.forEach(design => {
+                const card = document.createElement('div');
+                card.className = 'design-card';
+                card.onclick = () => openDesignModal(design);
+                
+                card.innerHTML = `
+                    <img src="${design.image}" alt="${design.title}" loading="lazy">
+                    <div class="card-info">
+                        <div class="card-title">${design.title}</div>
+                        <div class="card-company">${design.company}</div>
+                    </div>
+                `;
+                
+                gallery.appendChild(card);
+            });
+        }
+
+        // 検索機能
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            filteredDesigns = designs.filter(design => 
+                design.title.toLowerCase().includes(query) ||
+                design.company.toLowerCase().includes(query) ||
+                design.description.toLowerCase().includes(query)
+            );
+            renderGallery();
+        });
+
+        // デザイン詳細モーダル
+        function openDesignModal(design) {
+            document.getElementById('modalImage').src = design.image;
+            document.getElementById('modalTitle').textContent = design.title;
+            document.getElementById('modalCompany').textContent = design.company;
+            document.getElementById('modalDescription').textContent = design.description;
+            document.getElementById('designModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('designModal').style.display = 'none';
+        }
+
+        // アップロードモーダル
+        function openUploadModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('uploadForm').reset();
+            document.getElementById('imagePreview').innerHTML = '';
+            selectedFile = null;
+        }
+
+        // ファイル選択処理
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('imagePreview').innerHTML = `
+                        <img src="${e.target.result}" style="max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 6px;">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // フォーム送信処理
+        document.getElementById('uploadForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!selectedFile) {
+                alert('画像を選択してください');
+                return;
+            }
+            
+            const title = document.getElementById('designTitle').value;
+            const company = document.getElementById('companyName').value;
+            const description = document.getElementById('designDescription').value;
+            
+            // 画像をBase64に変換して保存
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const newDesign = {
+                    id: designs.length + 1,
+                    title: title,
+                    company: company,
+                    description: description,
+                    image: e.target.result,
+                    height: 500 + Math.random() * 200 // ランダムな高さ
+                };
+                
+                designs.unshift(newDesign);
+                filteredDesigns = [...designs];
+                renderGallery();
+                closeUploadModal();
+                alert('デザインが追加されました！');
+            };
+            reader.readAsDataURL(selectedFile);
+        });
+
+        // モーダル外クリックで閉じる
+        window.onclick = function(event) {
+            const designModal = document.getElementById('designModal');
+            const uploadModal = document.getElementById('uploadModal');
+            
+            if (event.target === designModal) {
+                closeModal();
+            }
+            if (event.target === uploadModal) {
+                closeUploadModal();
+            }
+        };
+
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeUploadModal();
+            }
+        });
+    </script>
+</body>
+</html>
