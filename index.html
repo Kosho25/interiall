@@ -169,6 +169,7 @@
             border-radius: 20px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            cursor: pointer;
         }
 
         .nav-tab.active {
@@ -580,7 +581,7 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         /* アニメーション効果 */
@@ -594,6 +595,16 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+        /* ログインのフェードアウトアニメーション */
+        .login-overlay.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -601,9 +612,9 @@
     <div class="login-overlay" id="loginOverlay">
         <div class="login-box">
             <h2>ログインしてギャラリーを見る</h2>
-            <button class="login-btn gmail-btn" onclick="login('gmail')">📧 Gmailでログイン</button>
-            <button class="login-btn" onclick="login('email')">✉️ メールアドレスでログイン</button>
-            <button class="login-btn apple-btn" onclick="login('apple')">🍎 Apple IDでログイン</button>
+            <button class="login-btn gmail-btn" onclick="handleLogin('gmail')">📧 Gmailでログイン</button>
+            <button class="login-btn" onclick="handleLogin('email')">✉️ メールアドレスでログイン</button>
+            <button class="login-btn apple-btn" onclick="handleLogin('apple')">🍎 Apple IDでログイン</button>
         </div>
     </div>
 
@@ -612,17 +623,17 @@
         <!-- ヘッダー -->
         <header class="header">
             <div class="header-content">
-                <a href="#" class="logo">Interior Gallery</a>
+                <a href="#" class="logo" onclick="showSection('designs', this)">Interior Gallery</a>
                 <nav class="nav-tabs">
-                    <a href="#" class="nav-tab active" onclick="showSection('designs')">Interior Designs</a>
-                    <a href="#" class="nav-tab" onclick="showSection('furniture')">Furnitures</a>
-                    <a href="#" class="nav-tab" onclick="showSection('coordinators')">Find Coordinators</a>
+                    <a href="#" class="nav-tab active" onclick="showSection('designs', this)">Interior Designs</a>
+                    <a href="#" class="nav-tab" onclick="showSection('furniture', this)">Furnitures</a>
+                    <a href="#" class="nav-tab" onclick="showSection('coordinators', this)">Find Coordinators</a>
                 </nav>
                 <div class="search-box">
                     <input type="text" class="search-input" placeholder="デザインを検索..." id="searchInput">
                 </div>
                 <div class="user-menu">
-                    <div class="user-avatar" onclick="showSection('profile')">U</div>
+                    <div class="user-avatar" onclick="showSection('profile', this)">U</div>
                 </div>
             </div>
         </header>
@@ -756,7 +767,252 @@
                 title: "クラシックサロン",
                 company: "Classic Elegance",
                 description: "伝統的な美しさを現代に。上質な素材と格調高いデザインが織りなす空間。",
-                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=620&fit=crop",
+                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop"
+            }
+        ];
+
+        // コーディネーターデータ
+        let coordinators = [
+            {
+                id: 1,
+                name: "田中 美咲",
+                specialty: "北欧・ミニマルデザイン",
+                rating: 4.9,
+                reviews: 127,
+                price: "相談料：¥8,000/時間",
+                description: "10年以上の経験を持つインテリアコーディネーター。北欧スタイルを得意とし、機能性と美しさを両立させたデザインを提案します。",
+                image: "https://images.unsplash.com/photo-1494790108755-2616c179b589?w=400&h=300&fit=crop"
+            },
+            {
+                id: 2,
+                name: "佐藤 健太",
+                specialty: "モダン・インダストリアル",
+                rating: 4.8,
+                reviews: 89,
+                price: "相談料：¥10,000/時間",
+                description: "都市型住宅のデザインを専門とし、モダンでスタイリッシュな空間作りが得意です。",
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop"
+            },
+            {
+                id: 3,
+                name: "山田 彩香",
+                specialty: "クラシック・アンティーク",
+                rating: 4.7,
+                reviews: 156,
+                price: "相談料：¥9,000/時間",
+                description: "ヨーロッパのクラシックスタイルを現代に融合させる専門家。上品で洗練された空間を演出します。",
+                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=300&fit=crop"
+            }
+        ];
+
+        // ログイン処理
+        function handleLogin(loginType) {
+            console.log(`${loginType}でのログインを開始`);
+            
+            // ログイン画面にフェードアウトアニメーションを追加
+            const loginOverlay = document.getElementById('loginOverlay');
+            loginOverlay.classList.add('fade-out');
+            
+            // アニメーション完了後にログイン画面を非表示にし、メインコンテンツを表示
+            setTimeout(() => {
+                loginOverlay.style.display = 'none';
+                document.getElementById('mainContent').classList.remove('hidden');
+                
+                // 初期データを読み込み
+                loadDesigns();
+                loadFurniture();
+                loadCoordinators();
+            }, 500);
+        }
+
+        // デザインデータを読み込み
+        function loadDesigns() {
+            const columns = [
+                document.getElementById('column1'),
+                document.getElementById('column2'),
+                document.getElementById('column3')
+            ];
+
+            designs.forEach((design, index) => {
+                const columnIndex = index % 3;
+                const card = createDesignCard(design);
+                columns[columnIndex].appendChild(card);
+            });
+        }
+
+        // デザインカードを作成
+        function createDesignCard(design) {
+            const card = document.createElement('div');
+            card.className = 'design-card animate-on-scroll';
+            card.onclick = () => openDesignModal(design);
+            
+            card.innerHTML = `
+                <img src="${design.image}" alt="${design.title}" loading="lazy">
+                <div class="card-overlay">
+                    <div class="card-title">${design.title}</div>
+                    <div class="card-company">${design.company}</div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // 家具データを読み込み
+        function loadFurniture() {
+            const container = document.getElementById('furnitureGrid');
+            
+            furniture.forEach(item => {
+                const card = createFurnitureCard(item);
+                container.appendChild(card);
+            });
+        }
+
+        // 家具カードを作成
+        function createFurnitureCard(item) {
+            const card = document.createElement('div');
+            card.className = 'item-card animate-on-scroll';
+            
+            card.innerHTML = `
+                <img src="${item.image}" alt="${item.title}" loading="lazy">
+                <div class="item-info">
+                    <div class="item-title">${item.title}</div>
+                    <div class="item-price">${item.price}</div>
+                    <div class="item-description">${item.description}</div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // コーディネーターデータを読み込み
+        function loadCoordinators() {
+            const container = document.getElementById('coordinatorsGrid');
+            
+            coordinators.forEach(coordinator => {
+                const card = createCoordinatorCard(coordinator);
+                container.appendChild(card);
+            });
+        }
+
+        // コーディネーターカードを作成
+        function createCoordinatorCard(coordinator) {
+            const card = document.createElement('div');
+            card.className = 'item-card animate-on-scroll';
+            
+            const stars = '★'.repeat(Math.floor(coordinator.rating)) + 
+                         (coordinator.rating % 1 >= 0.5 ? '☆' : '');
+            
+            card.innerHTML = `
+                <img src="${coordinator.image}" alt="${coordinator.name}" loading="lazy">
+                <div class="item-info">
+                    <div class="item-title">${coordinator.name}</div>
+                    <div class="item-price">${coordinator.price}</div>
+                    <div class="item-description">${coordinator.specialty}</div>
+                    <div class="coordinator-rating">
+                        <span class="stars">${stars}</span>
+                        <span>${coordinator.rating} (${coordinator.reviews}件)</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // セクション表示切り替え
+        function showSection(sectionName, element) {
+            // 全てのセクションを非表示
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 選択されたセクションを表示
+            document.getElementById(sectionName + '-section').classList.add('active');
+            
+            // ナビゲーションタブのアクティブ状態を更新
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            if (element && element.classList.contains('nav-tab')) {
+                element.classList.add('active');
+            }
+        }
+
+        // デザイン詳細モーダルを開く
+        function openDesignModal(design) {
+            document.getElementById('modalImage').src = design.image;
+            document.getElementById('modalTitle').textContent = design.title;
+            document.getElementById('modalCompany').textContent = design.company;
+            document.getElementById('modalDescription').textContent = design.description;
+            document.getElementById('designModal').style.display = 'flex';
+        }
+
+        // モーダルを閉じる
+        function closeModal() {
+            document.getElementById('designModal').style.display = 'none';
+        }
+
+        // アップロードモーダル（ダミー関数）
+        function openUploadModal() {
+            alert('アップロード機能は開発中です。');
+        }
+
+        // 検索機能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.design-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const company = card.querySelector('.card-company').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || company.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // スクロールアニメーション
+        function handleScrollAnimation() {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('animated');
+                }
+            });
+        }
+
+        // モーダル外クリックで閉じる
+        document.getElementById('designModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ESCキーでモーダルを閉じる
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // スクロールイベントリスナー
+        window.addEventListener('scroll', handleScrollAnimation);
+
+        // 初期化（ページ読み込み時はログイン画面を表示）
+        document.addEventListener('DOMContentLoaded', function() {
+            // ログイン画面が表示される（デフォルト状態）
+            console.log('ページが読み込まれました。ログインしてください。');
+        });
+    </script>
+</body>
+</html>e02f11c3d0e2?w=400&h=620&fit=crop",
                 style: "classic"
             },
             {
@@ -766,222 +1022,6 @@
                 description: "1920年代の華やかさを再現。幾何学的パターンと豪華な装飾が印象的。",
                 image: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400&h=550&fit=crop",
                 style: "artdeco"
-            },
-            {
-                id: 11,
-                title: "コンテンポラリーリビング",
-                company: "Contemporary Designs",
-                description: "現代的で洗練されたデザイン。トレンドを取り入れた今の時代を反映する空間。",
-                image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=480&fit=crop",
-                style: "contemporary"
-            },
-            {
-                id: 12,
-                title: "トランジショナルスタイル",
-                company: "Transitional Interiors",
-                description: "伝統と現代の要素を融合。バランスの取れた上品で居心地の良い空間。",
-                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=600&fit=crop",
-                style: "transitional"
-            },
-            {
-                id: 13,
-                title: "アンティークスタディ",
-                company: "Antique Collections",
-                description: "歴史ある家具と装飾品が織りなす重厚で格式高い書斎空間。",
-                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=580&fit=crop",
-                style: "antique"
-            },
-            {
-                id: 14,
-                title: "エクレクティックミックス",
-                company: "Eclectic Designs",
-                description: "様々なスタイルを巧みに組み合わせた個性的で創造的な空間。",
-                image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=520&fit=crop",
-                style: "eclectic"
-            },
-            {
-                id: 15,
-                title: "カリフォルニアスタイル",
-                company: "West Coast Living",
-                description: "リラックスした西海岸の雰囲気。自然光と開放感を重視したデザイン。",
-                image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400&h=500&fit=crop",
-                style: "california"
-            },
-            {
-                id: 16,
-                title: "コロニアルホール",
-                company: "Colonial Heritage",
-                description: "アメリカ植民地時代の伝統的なスタイル。重厚な木材と格調高いデザイン。",
-                image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=650&fit=crop",
-                style: "colonial"
-            },
-            {
-                id: 17,
-                title: "トロピカルリゾート",
-                company: "Tropical Paradise",
-                description: "南国のリゾート感を演出。自然素材と鮮やかな植物が生み出す楽園のような空間。",
-                image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=500&fit=crop",
-                style: "tropical"
-            },
-            {
-                id: 18,
-                title: "ビーチマリンスタイル",
-                company: "Coastal Living",
-                description: "海辺の爽やかさを表現。白とブルーを基調とした清涼感のある空間。",
-                image: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=400&h=550&fit=crop",
-                style: "beach"
-            },
-            {
-                id: 19,
-                title: "フレンチプロヴァンス",
-                company: "Provence Style",
-                description: "南フランスの田園風景を彷彿とさせる。ラベンダー色と自然素材の調和。",
-                image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400&h=580&fit=crop",
-                style: "french"
-            },
-            {
-                id: 20,
-                title: "ニューイングランド",
-                company: "New England Homes",
-                description: "アメリカ東海岸の伝統的スタイル。シンプルで実用的な美しさ。",
-                image: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=400&h=480&fit=crop",
-                style: "newengland"
-            },
-            {
-                id: 21,
-                title: "アジアンリトリート",
-                company: "Asian Zen Designs",
-                description: "東洋の静謐さを表現。竹、石、水の要素を取り入れた瞑想的空間。",
-                image: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=400&h=600&fit=crop",
-                style: "asian"
-            },
-            {
-                id: 22,
-                title: "和モダンリビング",
-                company: "Japanese Modern",
-                description: "日本の美意識と現代デザインの融合。ミニマルで機能的な美しさ。",
-                image: "https://images.unsplash.com/photo-1540518614846-7eded47fa681?w=400&h=520&fit=crop",
-                style: "wamodern"
-            },
-            {
-                id: 23,
-                title: "純和風数寄屋造り",
-                company: "Traditional Japan",
-                description: "日本建築の粋を集めた数寄屋造り。自然との調和を重視した伝統美。",
-                image: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=600&fit=crop",
-                style: "sukiya"
-            },
-            {
-                id: 24,
-                title: "侘寂の茶室",
-                company: "Wabi Sabi Aesthetics",
-                description: "不完全の美を追求した侘寂の世界。静寂と簡素さが生み出す深い美しさ。",
-                image: "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=400&h=550&fit=crop",
-                style: "wabisabi"
-            },
-            {
-                id: 25,
-                title: "和風リゾート",
-                company: "Japanese Resort Style",
-                description: "高級旅館の雰囲気を自宅に。伝統とモダンが融合したリラックス空間。",
-                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=480&fit=crop",
-                style: "waresort"
-            },
-            {
-                id: 26,
-                title: "ジャパニーズミニマル",
-                company: "Japanese Minimal",
-                description: "日本的ミニマリズムの極致。余白と素材の美しさを活かした空間。",
-                image: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=400&h=580&fit=crop",
-                style: "japminimal"
-            },
-            {
-                id: 27,
-                title: "ミッションスタイル",
-                company: "Mission Style Homes",
-                description: "スペイン植民地様式の影響を受けたアメリカ南西部のスタイル。",
-                image: "https://images.unsplash.com/photo-1513161455079-7dc1de15ef3e?w=400&h=500&fit=crop",
-                style: "mission"
-            },
-            {
-                id: 28,
-                title: "ロフトスタイル",
-                company: "Urban Loft Co.",
-                description: "都市部の倉庫や工場を住居に改装したスタイル。開放感と工業的美しさ。",
-                image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=620&fit=crop",
-                style: "loft"
-            },
-            {
-                id: 29,
-                title: "アメリカンカントリー",
-                company: "American Country",
-                description: "アメリカの田舎の温かさを表現。パッチワークと木材の温もり。",
-                image: "https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=400&h=480&fit=crop",
-                style: "americancountry"
-            },
-            {
-                id: 30,
-                title: "フレンチシック",
-                company: "French Chic Interiors",
-                description: "パリジェンヌのエレガンス。洗練されたフランス的な上品さ。",
-                image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=550&fit=crop",
-                style: "frenchchic"
-            },
-            {
-                id: 31,
-                title: "トスカーナ地中海風",
-                company: "Mediterranean Villa",
-                description: "イタリア・トスカーナ地方の温かみ。テラコッタとオリーブの調和。",
-                image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=580&fit=crop",
-                style: "tuscany"
-            },
-            {
-                id: 32,
-                title: "モロッカンリビング",
-                company: "Moroccan Designs",
-                description: "モロッコの鮮やかな色彩とパターン。エキゾチックで神秘的な空間。",
-                image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=500&fit=crop",
-                style: "moroccan"
-            },
-            {
-                id: 33,
-                title: "アーバンコンテンポラリー",
-                company: "Urban Contemporary",
-                description: "都市的で洗練された現代スタイル。スタイリッシュで機能的な都市生活。",
-                image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=480&fit=crop",
-                style: "urban"
-            },
-            {
-                id: 34,
-                title: "ネオクラシック",
-                company: "Neo Classical",
-                description: "古典主義の現代的解釈。格調高い美しさと現代の快適さの融合。",
-                image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=600&fit=crop",
-                style: "neoclassical"
-            },
-            {
-                id: 35,
-                title: "ビクトリアンマンション",
-                company: "Victorian Elegance",
-                description: "19世紀英国の華麗なスタイル。装飾的で豪華な空間美。",
-                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=650&fit=crop",
-                style: "victorian"
-            },
-            {
-                id: 36,
-                title: "スパニッシュ地中海",
-                company: "Spanish Mediterranean",
-                description: "スペインの地中海沿岸の建築様式。アーチと白壁の美しい調和。",
-                image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400&h=520&fit=crop",
-                style: "spanish"
-            },
-            {
-                id: 37,
-                title: "グランピング風",
-                company: "Glamping Style",
-                description: "贅沢なキャンプの要素を室内に。自然とラグジュアリーの絶妙なバランス。",
-                image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=480&fit=crop",
-                style: "glamping"
             }
         ];
 
@@ -1027,250 +1067,4 @@
                 title: "アンティーク風キャビネット",
                 price: "¥120,000",
                 description: "ヨーロッパのアンティーク家具を再現した収納キャビネット",
-                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop"
-            }
-        ];
-
-        // コーディネーターデータ
-        let coordinators = [
-            {
-                id: 1,
-                name: "田中 美咲",
-                specialty: "北欧・ミニマリストデザイン",
-                rating: 4.9,
-                experience: "8年",
-                description: "北欧デザインを専門とし、機能的で美しい空間づくりを得意としています。",
-                image: "https://images.unsplash.com/photo-1494790108755-2616c80241b4?w=400&h=300&fit=crop"
-            },
-            {
-                id: 2,
-                name: "佐藤 健太",
-                specialty: "モダン・コンテンポラリー",
-                rating: 4.8,
-                experience: "12年",
-                description: "現代的なデザインと最新技術を融合させた革新的な空間を提案します。",
-                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop"
-            },
-            {
-                id: 3,
-                name: "山田 花子",
-                specialty: "和モダン・アジアンスタイル",
-                rating: 4.7,
-                experience: "10年",
-                description: "日本の伝統美と現代的要素を融合させた独創的なデザインが人気です。",
-                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=300&fit=crop"
-            },
-            {
-                id: 4,
-                name: "鈴木 太郎",
-                specialty: "インダストリアル・ロフト",
-                rating: 4.6,
-                experience: "7年",
-                description: "都市的でクールなインダストリアルデザインを得意とするデザイナーです。",
-                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop"
-            },
-            {
-                id: 5,
-                name: "高橋 麗子",
-                specialty: "クラシック・エレガント",
-                rating: 4.9,
-                experience: "15年",
-                description: "伝統的な美しさと現代の快適さを両立させた上品な空間をデザインします。",
-                image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=300&fit=crop"
-            },
-            {
-                id: 6,
-                name: "松本 誠",
-                specialty: "ボヘミアン・エクレクティック",
-                rating: 4.5,
-                experience: "9年",
-                description: "個性的で創造的な空間づくりを通じて、お客様の個性を表現します。",
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop"
-            }
-        ];
-
-        let filteredDesigns = [...designs];
-        let currentSection = 'designs';
-
-        // ログイン処理
-        function login(provider) {
-            console.log(`${provider}でログイン`);
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainContent').classList.remove('hidden');
-            renderGallery();
-            renderFurniture();
-            renderCoordinators();
-        }
-
-        // セクション切り替え
-        function showSection(section) {
-            // すべてのセクションを非表示
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            
-            // 選択されたセクションを表示
-            document.getElementById(`${section}-section`).classList.add('active');
-            event.target.classList.add('active');
-            
-            currentSection = section;
-        }
-
-        // マセナリーレイアウトでギャラリー表示（3カラム）
-        function renderGallery() {
-            const columns = [
-                document.getElementById('column1'),
-                document.getElementById('column2'),
-                document.getElementById('column3')
-            ];
-            
-            // カラムをクリア
-            columns.forEach(col => col.innerHTML = '');
-            
-            // デザインを3つのカラムに分散
-            filteredDesigns.forEach((design, index) => {
-                const columnIndex = index % 3;
-                const card = createDesignCard(design);
-                columns[columnIndex].appendChild(card);
-            });
-        }
-
-        // デザインカード作成
-        function createDesignCard(design) {
-            const card = document.createElement('div');
-            card.className = 'design-card animate-on-scroll';
-            card.onclick = () => openDesignModal(design);
-            
-            // ランダムな高さを設定（250-450px）
-            const randomHeight = 250 + Math.random() * 200;
-            
-            card.innerHTML = `
-                <img src="${design.image}" alt="${design.title}" loading="lazy" style="height: ${randomHeight}px;">
-                <div class="card-overlay">
-                    <div class="card-title">${design.title}</div>
-                    <div class="card-company">${design.company}</div>
-                </div>
-            `;
-            
-            return card;
-        }
-
-        // 家具セクション表示
-        function renderFurniture() {
-            const grid = document.getElementById('furnitureGrid');
-            grid.innerHTML = '';
-            
-            furniture.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'item-card animate-on-scroll';
-                
-                card.innerHTML = `
-                    <img src="${item.image}" alt="${item.title}" loading="lazy">
-                    <div class="item-info">
-                        <div class="item-title">${item.title}</div>
-                        <div class="item-price">${item.price}</div>
-                        <div class="item-description">${item.description}</div>
-                    </div>
-                `;
-                
-                grid.appendChild(card);
-            });
-        }
-
-        // コーディネーターセクション表示
-        function renderCoordinators() {
-            const grid = document.getElementById('coordinatorsGrid');
-            grid.innerHTML = '';
-            
-            coordinators.forEach(coordinator => {
-                const card = document.createElement('div');
-                card.className = 'item-card animate-on-scroll';
-                
-                const stars = '★'.repeat(Math.floor(coordinator.rating)) + 
-                             (coordinator.rating % 1 >= 0.5 ? '☆' : '');
-                
-                card.innerHTML = `
-                    <img src="${coordinator.image}" alt="${coordinator.name}" loading="lazy">
-                    <div class="item-info">
-                        <div class="item-title">${coordinator.name}</div>
-                        <div class="item-description">${coordinator.specialty}</div>
-                        <div class="coordinator-rating">
-                            <span class="stars">${stars}</span>
-                            <span>${coordinator.rating}</span>
-                            <span>(${coordinator.experience})</span>
-                        </div>
-                        <div class="item-description">${coordinator.description}</div>
-                    </div>
-                `;
-                
-                grid.appendChild(card);
-            });
-        }
-
-        // 検索機能
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            
-            if (currentSection === 'designs') {
-                filteredDesigns = designs.filter(design => 
-                    design.title.toLowerCase().includes(query) ||
-                    design.company.toLowerCase().includes(query) ||
-                    design.description.toLowerCase().includes(query) ||
-                    design.style.toLowerCase().includes(query)
-                );
-                renderGallery();
-            }
-        });
-
-        // デザイン詳細モーダル
-        function openDesignModal(design) {
-            document.getElementById('modalImage').src = design.image;
-            document.getElementById('modalTitle').textContent = design.title;
-            document.getElementById('modalCompany').textContent = design.company;
-            document.getElementById('modalDescription').textContent = design.description;
-            document.getElementById('designModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('designModal').style.display = 'none';
-        }
-
-        // アップロードモーダル（簡略版）
-        function openUploadModal() {
-            alert('アップロード機能は開発中です。近日公開予定！');
-        }
-
-        // スクロールアニメーション
-        function handleScrollAnimation() {
-            const elements = document.querySelectorAll('.animate-on-scroll');
-            elements.forEach(element => {
-                const elementTop = element.getBoundingClientRect().top;
-                const elementVisible = 150;
-                
-                if (elementTop < window.innerHeight - elementVisible) {
-                    element.classList.add('animated');
-                }
-            });
-        }
-
-        // イベントリスナー
-        window.addEventListener('scroll', handleScrollAnimation);
-        
-        // モーダル外クリックで閉じる
-        window.onclick = function(event) {
-            const designModal = document.getElementById('designModal');
-            if (event.target === designModal) {
-                closeModal();
-            }
-        };
-
-        // キーボードショートカット
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        // ページロード時のアニメーション
-        window.addEventListener('load', () => {
-            setTimeout(handleScrollAnimation, 100);
-        });
+                image: "https://images.unsplash.com/photo-1560448204-
